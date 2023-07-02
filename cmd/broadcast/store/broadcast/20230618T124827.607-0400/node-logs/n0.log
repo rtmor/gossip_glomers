@@ -1,0 +1,12 @@
+2023/06/18 12:48:28 Received {c0 n0 {"type":"init","node_id":"n0","node_ids":["n0"],"msg_id":1}}
+2023/06/18 12:48:28 Node n0 initialized
+2023/06/18 12:48:28 Sent {"src":"n0","dest":"c0","body":{"in_reply_to":1,"type":"init_ok"}}
+2023/06/18 12:48:28 Received {c1 n0 {"type":"topology","topology":{"n0":[]},"msg_id":1}}
+2023/06/18 12:48:28 No handler for {"id":2,"src":"c1","dest":"n0","body":{"type":"topology","topology":{"n0":[]},"msg_id":1}}
+panic: No handler for {"id":2,"src":"c1","dest":"n0","body":{"type":"topology","topology":{"n0":[]},"msg_id":1}}
+
+goroutine 1 [running]:
+log.Panic({0xc0000bdf60?, 0x0?, 0x0?})
+	/usr/lib/golang/src/log/log.go:384 +0x65
+main.main()
+	/var/home/rtmoran/repos/rtmor/maelstrom/cmd/broadcast/main.go:10 +0x50
