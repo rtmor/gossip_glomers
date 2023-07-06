@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
-	gg "gglomers"
+	"gglomers/internal/broadcast"
 )
 
 func main() {
-	s := gg.NewBroadcastService()
+	s := broadcast.NewBroadcastService()
 	log.Panic(s.Run())
 }

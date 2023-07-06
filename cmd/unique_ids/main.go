@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
-	gg "gglomers"
+	"gglomers/internal/uniqueids"
 )
 
 func main() {
-	node := gg.NewUniqueIDService()
+	node := uniqueids.NewUniqueIDService()
 	log.Panic(node.Run())
 }
