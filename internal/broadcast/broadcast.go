@@ -11,8 +11,7 @@ import (
 )
 
 type IDs struct {
-	data  []int
-	cache *nodeCache
+	data []int
 
 	mu sync.RWMutex
 }
@@ -30,12 +29,13 @@ type Service struct {
 	topology *Topology
 }
 
+var ErrInvalidType = errors.New("request type invalid")
+
 func NewBroadcastService() *Service {
 	srv := &Service{
 		node: maelstrom.NewNode(),
 		ids: &IDs{
-			data:  []int{},
-			cache: &nodeCache{},
+			data: []int{},
 		},
 		topology: &Topology{
 			data: map[string][]string{},
@@ -55,18 +55,6 @@ func (s *Service) Run() error {
 	}
 
 	return nil
-}
-
-var ErrInvalidType = errors.New("request type invalid")
-
-type nodeCache map[int]struct{}
-
-func (c *nodeCache) Clear() {
-	*c = map[int]struct{}{}
-}
-
-func (c *nodeCache) Append(nodeID int) {
-	(*c)[nodeID] = struct{}{}
 }
 
 func (s *Service) BroadcastHandler(msg maelstrom.Message) error {
@@ -101,32 +89,6 @@ func (s *Service) BroadcastHandler(msg maelstrom.Message) error {
 	}
 
 	return nil
-}
-
-func broadcastAll(n *maelstrom.Node) func(src string, body map[string]any) error {
-	g := new(errgroup.Group)
-
-	return func(src string, body map[string]any) error {
-		for _, dst := range n.NodeIDs() {
-			dst := dst
-			if dst == src || n.ID() == dst {
-				continue
-			}
-
-			g.Go(func() error {
-				if err := n.Send(dst, body); err != nil {
-					return fmt.Errorf("sending broadcast reply failed: %w", err)
-				}
-				return nil
-			})
-
-			if err := g.Wait(); err != nil {
-				return err
-			}
-		}
-
-		return nil
-	}
 }
 
 func (s *Service) ReadHandler(msg maelstrom.Message) error {
@@ -176,4 +138,30 @@ func (s *Service) TopologyHandler(msg maelstrom.Message) error {
 	}
 
 	return nil
+}
+
+func broadcastAll(n *maelstrom.Node) func(src string, body map[string]any) error {
+	return func(src string, body map[string]any) error {
+		var g errgroup.Group
+
+		for _, dst := range n.NodeIDs() {
+			dst := dst
+			if dst == src || n.ID() == dst {
+				continue
+			}
+
+			g.Go(func() error {
+				if err := n.Send(dst, body); err != nil {
+					return fmt.Errorf("sending broadcast reply failed: %w", err)
+				}
+				return nil
+			})
+
+			if err := g.Wait(); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
 }
